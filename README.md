@@ -1,5 +1,5 @@
-Certainly, here's an example README file with Markdown formatting suitable for pasting to GitHub:
 
+```
 # Retrieval-Augmented Generation Q&A using Telegram Bot
 
 This project is a Q&A system that uses a retrieval-augmented generation approach to answer questions. The system retrieves relevant documents from a database using a vector similarity search algorithm and generates an answer based on the retrieved documents and the original question. The Q&A system is deployed as a Telegram bot that can be used to ask questions and receive answers.
@@ -10,45 +10,55 @@ To use this Q&A system, you will need the following:
 
 - Python 3.7 or later
 - The packages listed in `requirements.txt`
-- A Telegram account and an API token for a Telegram bot (see the [Telegram documentation](https://core.telegram.org/bots#6-botfather) for instructions on how to create a bot and obtain an API token)
-- A database of documents in plain text format
+- A Telegram account and an API token for a Telegram bot (see the Telegram documentation for instructions on how to create a bot and obtain an API token)
+- A directory containing plain text documents to use as the database
+- An OpenAI API key (optional, only required if using the OpenAI embeddings method for generating document vectors)
 
 ## Installation
 
-To install the necessary packages, run the following command:
+1. Clone the repository:
 
-```bash
+```
+git clone https://github.com/<username>/<repository>.git
+```
+
+2. Navigate to the project directory:
+
+```
+cd <repository>
+```
+
+3. Install the necessary packages:
+
+```
 pip install -r requirements.txt
 ```
 
-## Configuration
-
-Before using the Q&A system, you will need to configure the following settings:
-
-- `OPENAI_API_KEY`: Your OpenAI API key (required for document embeddings)
-- `TELEGRAM_BOT_TOKEN`: Your Telegram bot API token
-- `DOCUMENTS_DIRECTORY`: The path to the directory containing the documents
-
-These settings can be configured by creating a `.env` file in the root of the project directory with the following contents:
+4. Create a `.env` file in the project directory with the following variables:
 
 ```
-OPENAI_API_KEY=INSERT_YOUR_OPENAI_API_KEY_HERE
-TELEGRAM_BOT_TOKEN=INSERT_YOUR_TELEGRAM_BOT_TOKEN_HERE
-DOCUMENTS_DIRECTORY=/path/to/documents
+TELEGRAM_BOT_TOKEN=<your Telegram bot token>
+K=<the number of top results to return>
+DOCUMENT_DIRECTORY=<the path to the directory containing the plain text documents>
+OPENAI_API_KEY=<your OpenAI API key (optional)>
+BASE_URL=<the URL of your deployed FastAPI app>
 ```
 
-Replace `INSERT_YOUR_OPENAI_API_KEY_HERE` and `INSERT_YOUR_TELEGRAM_BOT_TOKEN_HERE` with your actual OpenAI API key and Telegram bot API token, respectively. Replace `/path/to/documents` with the actual path to the directory containing your documents.
+5. Start the Telegram bot:
+
+```
+python telegram_bot.py
+```
 
 ## Usage
 
-To start the Telegram bot, run the following command:
+1. Start a chat with your Telegram bot.
+2. Send a message containing your question.
+3. The bot will retrieve the top results from the document database and send them back to you.
 
-```bash
-python main.py
+## Additional Notes
+
+- If you need to index new documents, you can run the `indexing.py` script to create a new vector store. You may also need to modify the `load_documents()` function in `app/utils/document_loading.py` to properly load your new documents.
+- The default vector store uses the FAISS library for similarity search, but you can also use other vector stores such as Pinecone, Weaviate, or OpenSearch by modifying the `app/utils/vector_store.py` module.
+- The default method for generating document vectors uses the OpenAI GPT-3.5 language model, but you can also use other embeddings methods such as BERT, USE, or Doc2Vec by modifying the `app/utils/embeddings.py` module.
 ```
-
-This will start the Telegram bot and listen for incoming messages. To ask a question, send a message to the bot with the question text. The bot will retrieve relevant documents from the database and generate an answer based on the retrieved documents and the original question.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.

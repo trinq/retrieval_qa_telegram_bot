@@ -1,36 +1,35 @@
+import os
 import logging
-from telegram import Update, ForceReply
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
-from app.api.retrieval import get_answer
+import telegram
+from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from dotenv import load_dotenv
+import requests
 
-# Replace with your Telegram bot token
-TELEGRAM_BOT_TOKEN = "your_bot_token_here"
+load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+K = int(os.getenv("K", 5))
+BASE_URL = os.getenv("BASE_URL")
 
-logger = logging.getLogger(__name__)
+updater = Updater(token=TOKEN, use_context=True)
+dispatcher = updater.dispatcher
 
-def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text("Hi! I am your Retrieval-Augmented Generation Q&A bot. Ask me any question!")
+def start(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hi there!")
 
+def handle_message(update, context):
+    message_text = update.message.text
+    response = requests.get(f"{BASE_URL}/query_vector_store", params={"question": message_text}).json()
+    response_text = "Top results:\n\n"
+    for result in response:
+        response_text += f"{result['text']} ({result['score']:.4f})\n"
+    context.bot.send_message(chat_id=update.effective_chat.id, text=response_text)
 
-def ask_question(update: Update, context: CallbackContext) -> None:
-    user_query = update.message.text
-    answer = get_answer(user_query)
-    update.message.reply_text(answer)
+start_handler = CommandHandler("start", start)
+message_handler = MessageHandler(Filters.text, handle_message)
+dispatcher.add_handler(start_handler)
+dispatcher.add_handler(message_handler)
 
-
-def main() -> None:
-    updater = Updater(TELEGRAM_BOT_TOKEN)
-
-    dispatcher = updater.dispatcher
-
-    dispatcher.add_handler(CommandHandler("start", start))
-    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, ask_question))
-
-    updater.start_polling()
-    updater.idle()
-
-
-if __name__ == "__main__":
-    main()
+updater.start_polling()
+updater.idle()
